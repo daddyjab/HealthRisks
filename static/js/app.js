@@ -279,7 +279,6 @@ d3.csv("data/data.csv", function(err, healthData) {
   //           .y( p => yLinearScale( p['y'] ) ); 
   // }
 
-
   trendCoordArray = [
     {'x': d3.min(healthData, d => d[chosenXAxis]), 'y': d3.min(healthData, d => d[chosenYAxis])},
     {'x': d3.max(healthData, d => d[chosenXAxis]), 'y': d3.max(healthData, d => d[chosenYAxis])}
@@ -287,7 +286,6 @@ d3.csv("data/data.csv", function(err, healthData) {
   
   trendCoordScreenArray = trendCoordArray.map( function(p) {
     return {'x': xLinearScale( p['x'] ), 'y': yLinearScale( p['y'] ) };
-    // return [ xLinearScale( p['x'] ), yLinearScale( p['y'] ) ];
   });
 
   console.log("Trend Line Coords:", trendCoordArray);
@@ -307,7 +305,7 @@ d3.csv("data/data.csv", function(err, healthData) {
     .attr("stroke", "black")
     .attr("stroke-width", "1")
     .attr("fill", "none")
-    .attr("d", createLine(trendCoordScreenArray) );
+    .attr("d", createLine( trendCoordScreenArray ) );
 
   // Create group for two x-axis labels
   var xLabelsGroup = chartGroup.append("g")
