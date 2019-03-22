@@ -100,60 +100,39 @@ const toolTipTextList = {
   smokes: '% Population Who  Smoke'
 };
 
-// Use a flag to manage tooltip persistence
-var toolTipPersist = false;
 
 // function used for updating circles group with new tooltip
-function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
+// function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup, data) {
 
-  // var toolTipItem = d3.select("body")
-  // var toolTipItem = chartGroup.append("div")
-  //   .classed("tooltipinfo", true);
+//   // var toolTipItem = d3.select("body")
+//   var toolTipItem = chartGroup.append("div")
+//     .classed("tooltipinfo", true);
+  
+//   // Set mouse events for the circles
+//   circlesGroup
+//     // On mouseover, show tooltip
+//     .on("mouseover", function(d) {
 
-  var toolTipSpot = d3.tip()
-    // .classed("tooltipinfo", true)
-    .attr("class", "tooltipinfo")
-    .direction('se')
-    .html( function(d) {
-      tipInfo = `<h6>State: ${d['state']} (${d['abbr']})</h6><hr>`
-      tipInfo += `<p>${toolTipTextList[chosenXAxis]}: ${d[chosenXAxis]}<br>`
-      tipInfo += `${toolTipTextList[chosenYAxis]}: ${d[chosenYAxis]}</p>`
-      return tipInfo;
-    });
+//       // Display the tooltip item
+//       toolTipItem.style("display", "block")
+//         .html( function(x) {
+//           tipInfo = `State: ${d['state']} (${d['abbr']})<hr>`
+//           tipInfo += `${toolTipTextList[chosenXAxis]}: ${d[chosenXAxis]}<br>`
+//           tipInfo += `${toolTipTextList[chosenYAxis]}: ${d[chosenYAxis]}`
+//           return tipInfo;
+//         })
+//         .style("left", d3.event.pageX + "px")
+//         .style("top", d3.event.pageY + "px");
+//     })
 
-  // Set mouse events for the circles
-  circlesGroup.call(toolTipSpot);
+//     .on("mouseout", function() {
+//       // toolTipItem.style("display", "none");
+//       toolTipItem.style("display", "block");
+//     });
 
-  circlesGroup
-    // On mouseover, show tooltip
-    .on("mouseover", function(data) {
-      // Turnoff tooltip persistence, then show the tooltip
-      toolTipPersist = false;
-      toolTipSpot.show(data);
-    })
-
-    // On mouseout, hide tooltip
-    .on("mouseout", function(data) {
-      // Turn off the tooltip only if persistence is off
-      if (!toolTipPersist) {
-        toolTipSpot.hide(data);
-      }
-    })
-
-    .on("click", function() {
-      // Toggle the tooltip persistence flag
-      if (toolTipPersist) {
-        toolTipPersist = false;
-      } else {
-        toolTipPersist = true;
-      }
-      // console.log(`Mouse click event - toolTipPersist: ${toolTipPersist}`);  
-    });
-
-
-  // Return the circles group now that the events have been setup
-  return circlesGroup;
-}
+//   // Return the circles group now that the events have been setup
+//   return circlesGroup;
+// }
 
 // Retrieve data from the CSV file and execute everything below
 d3.csv("data/data.csv", function(err, healthData) {
@@ -268,7 +247,63 @@ d3.csv("data/data.csv", function(err, healthData) {
     .text("Poverty");
 
   // updateToolTip function above csv import
-  var stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup);
+  // var stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup, healthData);
+
+  // Add a tooltip item
+  var toolTipItem = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("display", "none")
+    .classed("tooltipinfo", true);
+
+  // Set a flag to click toolTip on/off
+  var toolTipPersist = true;
+  
+  // Set mouse events for the circles
+  stateCirclesGroup
+    // On mouseover, show tooltip
+    .on("mouseover", function(d) {
+      // Turn off the tooltip persistence flag
+      toolTipPersist = false;
+
+      // Build the tooltip content
+      tipInfo = `State: ${d['state']} (${d['abbr']})<hr>`
+      tipInfo += `${toolTipTextList[chosenXAxis]}: ${d[chosenXAxis]}<br>`
+      tipInfo += `${toolTipTextList[chosenYAxis]}: ${d[chosenYAxis]}`
+      tipInfo = "<h5>" + tipInfo + "</h5>"
+
+      // Display the tooltip item
+      // toolTipItem.style("visibility", "visible")
+      toolTipItem.style("display", "block")      
+        .html( tipInfo )
+        .style("left", (d3.event.pageX + 20) + "px")
+        .style("top", (d3.event.pageY + 20) + "px");
+
+      // console.log("Mouse event - PageXY, LayerXY:", d3.event.pageX, d3.event.pageY, d3.event.layerX, d3.event.layerY);
+      // console.log("Mouse event - Object:", d3.event);
+
+    })
+
+    .on("mouseout", function() {
+      // toolTipItem.style("visibility", "hidden");
+      // Only turn off the tooltip if the toolTipPersist flag is clear
+      if (!toolTipPersist) {
+        toolTipItem.style("display", "none");
+      }
+      console.log("Mouse out event - PageXY, LayerXY:", d3.event.pageX, d3.event.pageY, d3.event.layerX, d3.event.layerY);  
+    })
+
+    .on("click", function() {
+      // Toggle the tooltip persistence flag
+      if (toolTipPersist) {
+        toolTipPersist = false;
+      } else {
+        toolTipPersist = true;
+      }
+      console.log(`Mouse click event - toolTipPersist: ${toolTipPersist}`);  
+    });
+
 
     //   // x axis labels event listener
 //   labelsGroup.selectAll("text")
