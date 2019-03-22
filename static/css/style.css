@@ -3,6 +3,29 @@
   border: 1px solid #e3e3e3;
 }
 
+.article {
+  margin: 0 auto;
+  font-size: 20px;
+}
+
+.article h2 {
+  font-weight: 600;
+}
+
+.jumbotron {
+  font-family: sans-serif;
+  color: white;
+  border-color: black;
+  font-size: 48px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px;
+  background-color: steelblue;
+  border-color: darkblue;
+  border-radius: 15px;
+  border-width: 2px;
+}
+
 /* Sticky Footer rules (https://getbootstrap.com/examples/sticky-footer/) */
 html {
   position: relative;

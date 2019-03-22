@@ -10,8 +10,8 @@ Homework Assignment:
  ****************************************************/
 
 // Set the dimension of the SVG div for the chart
-var svgWidth = 960;
-var svgHeight = 500;
+var svgWidth = 1000;
+var svgHeight = 600;
 
 var margin = {
   top: 30,
@@ -35,7 +35,7 @@ var chartGroup = svg.append("g")
   .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 // Initial Params
-var chosenXAxis = "age";
+var chosenXAxis = "smokes";
 
 // function used for updating x-scale var upon click on axis label
 function xScale(data, chosenXAxis) {
@@ -52,7 +52,7 @@ function xScale(data, chosenXAxis) {
 }
 
 // Initial Params
-var chosenYAxis = "poverty";
+var chosenYAxis = "obesity";
 
 // function used for updating x-scale var upon click on axis label
 function yScale(data, chosenYAxis) {
@@ -265,14 +265,14 @@ d3.csv("data/data.csv", function(err, healthData) {
     .attr("x", 0)
     .attr("y", 20)
     .attr("value", "age") // value to grab for event listener
-    .classed("active", true)
+    .classed("inactive", true)
     .text("Age");
 
   var xAxisLabel_Smokes = xLabelsGroup.append("text")
     .attr("x", 0)
     .attr("y", 40)
     .attr("value", "smokes") // value to grab for event listener
-    .classed("inactive", true)
+    .classed("active", true)
     .text("Smokes (%)");
 
   // Create group for two y-axis labels
@@ -286,18 +286,18 @@ d3.csv("data/data.csv", function(err, healthData) {
     .attr("transform", "rotate(-90)")
     // .attr("dy", "1em")
     .attr("value", "poverty") // value to grab for event listener
-    .classed("active", true)
+    .classed("inactive", true)
     .text("Poverty");
 
   // append y axis
-  var yAxisLabel_Income = yLabelsGroup.append("text")
+  var yAxisLabel_Obesity = yLabelsGroup.append("text")
     .attr("y", -70)
     .attr("x", 0)
     .attr("transform", "rotate(-90)")
     // .attr("dy", "1em")
-    .attr("value", "income") // value to grab for event listener
-    .classed("inactive", true)
-    .text("Income");
+    .attr("value", "obesity") // value to grab for event listener
+    .classed("active", true)
+    .text("Obesity");
 
   // updateToolTip function above csv import
   var stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup);
@@ -394,7 +394,7 @@ d3.csv("data/data.csv", function(err, healthData) {
             .classed("active", true)
             .classed("inactive", false);
 
-            yAxisLabel_Income
+          yAxisLabel_Obesity
             .classed("active", false)
             .classed("inactive", true);
         }
@@ -403,7 +403,7 @@ d3.csv("data/data.csv", function(err, healthData) {
             .classed("active", false)
             .classed("inactive", true);
 
-          yAxisLabel_Income
+          yAxisLabel_Obesity
             .classed("active", true)
             .classed("inactive", false);
         }
