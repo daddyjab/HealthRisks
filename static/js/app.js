@@ -135,7 +135,7 @@ const toolTipTextList = {
 // }
 
 // Retrieve data from the CSV file and execute everything below
-d3.csv("static/js/data.csv", function(err, healthData) {
+d3.csv("data/data.csv", function(err, healthData) {
 
   if (err) {
     console.log("Error occurred while reading datafile: data.csv", err);
@@ -249,17 +249,23 @@ d3.csv("static/js/data.csv", function(err, healthData) {
   // updateToolTip function above csv import
   // var stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup, healthData);
 
+  // Add a tooltip item
   var toolTipItem = d3.select("body")
     .append("div")
     .style("position", "absolute")
     .style("z-index", "10")
-    .style("visibility", "hidden")
+    .style("display", "none")
     .classed("tooltipinfo", true);
 
-    // Set mouse events for the circles
+  // Set a flag to click toolTip on/off
+  var toolTipPersist = true;
+  
+  // Set mouse events for the circles
   stateCirclesGroup
     // On mouseover, show tooltip
     .on("mouseover", function(d) {
+      // Turn off the tooltip persistence flag
+      toolTipPersist = false;
 
       // Build the tooltip content
       tipInfo = `State: ${d['state']} (${d['abbr']})<hr>`
@@ -268,10 +274,11 @@ d3.csv("static/js/data.csv", function(err, healthData) {
       tipInfo = "<h5>" + tipInfo + "</h5>"
 
       // Display the tooltip item
-      toolTipItem.style("visibility", "visible")
+      // toolTipItem.style("visibility", "visible")
+      toolTipItem.style("display", "block")      
         .html( tipInfo )
-        .style("left", d3.event.pageX + "px")
-        .style("top", d3.event.pageY + "px");
+        .style("left", (d3.event.pageX + 20) + "px")
+        .style("top", (d3.event.pageY + 20) + "px");
 
       // console.log("Mouse event - PageXY, LayerXY:", d3.event.pageX, d3.event.pageY, d3.event.layerX, d3.event.layerY);
       // console.log("Mouse event - Object:", d3.event);
@@ -279,20 +286,22 @@ d3.csv("static/js/data.csv", function(err, healthData) {
     })
 
     .on("mouseout", function() {
-      toolTipItem.style("visibility", "hidden");
+      // toolTipItem.style("visibility", "hidden");
+      // Only turn off the tooltip if the toolTipPersist flag is clear
+      if (!toolTipPersist) {
+        toolTipItem.style("display", "none");
+      }
+      console.log("Mouse out event - PageXY, LayerXY:", d3.event.pageX, d3.event.pageY, d3.event.layerX, d3.event.layerY);  
     })
 
     .on("click", function() {
-      toolTipItem.style("visibility", "visible")
-      
-      // Build the tooltip content
-      tipInfo = `State: ${d['state']} (${d['abbr']})<hr>`
-      tipInfo += `${toolTipTextList[chosenXAxis]}: ${d[chosenXAxis]}<br>`
-      tipInfo += `${toolTipTextList[chosenYAxis]}: ${d[chosenYAxis]}`
-      tipInfo = "<h5>" + tipInfo + "</h5>"
-
-      .style("left", d3.event.pageX + "px")
-        .style("top", d3.event.pageY + "px");
+      // Toggle the tooltip persistence flag
+      if (toolTipPersist) {
+        toolTipPersist = false;
+      } else {
+        toolTipPersist = true;
+      }
+      console.log(`Mouse click event - toolTipPersist: ${toolTipPersist}`);  
     });
 
 
