@@ -257,6 +257,58 @@ d3.csv("data/data.csv", function(err, healthData) {
     .text( d => d["abbr"] )
     .classed("stateText", true);
 
+  // create a line generator function for a linear regression line
+  // function createTrendLine(chosenXAxis, chosenYAxis, data) {
+  //   // Calculate linear regression line
+  //   // DEBUG: Add any kind of simple line for now
+  //   // trendCoordArray = [
+  //   //   {'x': d3.min(data, d => d[chosenXAxis]), 'y': d3.min(data, d => d[chosenYAxis])},
+  //   //   {'x': d3.max(data, d => d[chosenXAxis]), 'y': d3.max(data, d => d[chosenYAxis])}
+  //   // ];
+    
+  //   // console.log("Trend Line Coords:", trendCoordArray);
+  //   // console.log("Trend Line Window X Coords:", trendCoordArray.map( p => xLinearScale( p['x'] )));
+  //   // console.log("Trend Line Window Y Coords:", trendCoordArray.map( p => yLinearScale( p['y'] )));
+
+  //   // return d3.line()
+  //   //         .x( trendCoordArray.map( p => xLinearScale( p['x'] )) )
+  //   //         .y( trendCoordArray.map( p => yLinearScale( p['y'] )) ); 
+ 
+  //   return d3.line(trendCoordArray)
+  //           .x( p => xLinearScale( p['x'] ) )
+  //           .y( p => yLinearScale( p['y'] ) ); 
+  // }
+
+
+  trendCoordArray = [
+    {'x': d3.min(healthData, d => d[chosenXAxis]), 'y': d3.min(healthData, d => d[chosenYAxis])},
+    {'x': d3.max(healthData, d => d[chosenXAxis]), 'y': d3.max(healthData, d => d[chosenYAxis])}
+  ];
+  
+  trendCoordScreenArray = trendCoordArray.map( function(p) {
+    return {'x': xLinearScale( p['x'] ), 'y': yLinearScale( p['y'] ) };
+    // return [ xLinearScale( p['x'] ), yLinearScale( p['y'] ) ];
+  });
+
+  console.log("Trend Line Coords:", trendCoordArray);
+  console.log("Trend Line Screen Coords:", trendCoordScreenArray);
+
+  // create a line generator function and store as a variable
+  // use the scale functions for x and y data
+  var createLine = d3.line()
+    .x(data => data.x )
+    .y(data => data.y );
+
+  // Append linear regression line
+  // var trendLineGroup = chartGroup.selectAll("path.trendLine")
+  var trendLineGroup = chartGroup
+    .append("path")
+    .classed("trendLine", true)
+    .attr("stroke", "black")
+    .attr("stroke-width", "1")
+    .attr("fill", "none")
+    .attr("d", createLine(trendCoordScreenArray) );
+
   // Create group for two x-axis labels
   var xLabelsGroup = chartGroup.append("g")
     .attr("transform", `translate(${width / 2}, ${height + 20})`);
