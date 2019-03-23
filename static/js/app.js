@@ -118,6 +118,41 @@ function renderLabels(labelsGroup,
 return labelsGroup;
 }
 
+// Function to calculate the linear regression of the data
+// indicated by chosenXAxis and chosenYAxis
+function getLinearRegr( chosenXAxis, chosenYAxis, data ) {
+
+  // Build the input array to the linear regression function as
+  // an array of coordinate point arrays
+  var inputArray = data.map( d => [ d[chosenXAxis], d[chosenYAxis] ] );
+
+  console.log("Input Array: ", inputArray);
+
+  // Calculate the linear regression
+  // Return Values:
+    // equation: an array containing the coefficients of the equation [slope, y-intercept]
+    // string: A string representation of the equation
+    // points: an array containing the predicted data in the domain of the input
+    // r2: the coefficient of determination (R2)
+    // predict(x): This function will return the predicted value as a coordinate point [x_input, y_predicted]
+
+  var result = regression.linear( inputArray );
+
+  console.log("Linear Regression:", result );
+
+  xMin = d3.min(data, d => d[chosenXAxis]);
+  xMax = d3.max(data, d => d[chosenXAxis]);
+
+  coordArray = [
+    {'x': xMin, 'y': result.predict(xMin)[1] },
+    {'x': xMax, 'y': result.predict(xMax)[1] }
+  ];
+
+  console.log("Coordinate Array:", coordArray);
+  
+  return coordArray;
+}
+
 // Object to specify the tooltip text based upon chosen axis
 const toolTipTextList = {
   poverty: '% Population in Poverty',
@@ -135,7 +170,6 @@ var toolTipPersist = false;
 function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
 
   var toolTipSpot = d3.tip()
-    // .classed("tooltipinfo", true)
     .attr("class", "tooltipinfo")
     .direction('se')
     .html( function(d) {
@@ -236,17 +270,30 @@ d3.csv("data/data.csv", function(err, healthData) {
       .classed("y-axis", true)
       .call(leftAxis);
 
-  // Append initial circles
-  var stateCirclesGroup = chartGroup.selectAll("circle")
+  // Add a linear regression line to the plot
+  // Calculate using the health data and the selected axes
+  trendCoordArray = getLinearRegr( chosenXAxis, chosenYAxis, healthData );
+
+  console.log("Trend Line Coords:", trendCoordArray);
+
+  // Create a line generator function and store as a variable
+  // Use the scale functions for x and y data
+  var createLine = d3.line()
+    .x(data => xLinearScale( data.x ) )
+    .y(data => yLinearScale( data.y ) );
+
+  // Append linear regression trend line to the chart group
+  // Add the trend line first so it will be underneath all other elements
+  var trendLineGroup = chartGroup.selectAll("path.trendLine")
     .data(healthData)
     .enter()
-    .append("circle")
-    .attr("cx", d => xLinearScale(d[chosenXAxis]))
-    .attr("cy", d => yLinearScale(d[chosenYAxis]))
-    .attr("r", 15)
-    .classed("stateCircle", true);
-
-  // Append initial circles
+    .append("path")
+    .classed("trendLine", true)
+    .attr("d", createLine( trendCoordArray ) );
+  
+  // Append initial text labels for the circles
+  // Add the text labels before the circles so they
+  // don't mess up the mouseover and mouseout events for the circles
   var stateTextGroup = chartGroup.selectAll("text.stateText")
     .data(healthData)
     .enter()
@@ -257,40 +304,18 @@ d3.csv("data/data.csv", function(err, healthData) {
     .text( d => d["abbr"] )
     .classed("stateText", true);
 
-  function getLinearRegr( data ) {
-
-    
-    coordArray = [
-      {'x': d3.min(healthData, d => d[chosenXAxis]), 'y': d3.min(healthData, d => d[chosenYAxis])},
-      {'x': d3.max(healthData, d => d[chosenXAxis]), 'y': d3.max(healthData, d => d[chosenYAxis])}
-    ];
-    
-    return coordArray;
-  }
-
-  trendCoordArray = getLinearRegr( healthData );
-
-  // trendCoordArray = [
-  //   {'x': d3.min(healthData, d => d[chosenXAxis]), 'y': d3.min(healthData, d => d[chosenYAxis])},
-  //   {'x': d3.max(healthData, d => d[chosenXAxis]), 'y': d3.max(healthData, d => d[chosenYAxis])}
-  // ];
+  // Append initial circles
+  // Add the circles last so they are on top,
+  // where their mouseover and mouseout events won't be impaired
+  var stateCirclesGroup = chartGroup.selectAll("circle")
+    .data(healthData)
+    .enter()
+    .append("circle")
+    .attr("cx", d => xLinearScale(d[chosenXAxis]))
+    .attr("cy", d => yLinearScale(d[chosenYAxis]))
+    .attr("r", 15)
+    .classed("stateCircle", true);
   
-  console.log("Trend Line Coords:", trendCoordArray);
-
-  // create a line generator function and store as a variable
-  // use the scale functions for x and y data
-  var createLine = d3.line()
-    .x(data => xLinearScale( data.x ) )
-    .y(data => yLinearScale( data.y ) );
-
-    // Append linear regression line
-  // var trendLineGroup = chartGroup.selectAll("path.trendLine")
-  var trendLineGroup = chartGroup
-    .append("path")
-    .classed("trendLine", true)
-    // .attr("d", createLine( trendCoordScreenArray ) );
-    .attr("d", createLine( trendCoordArray ) );
-
   // Create group for two x-axis labels
   var xLabelsGroup = chartGroup.append("g")
     .attr("transform", `translate(${width / 2}, ${height + 20})`);
@@ -362,13 +387,30 @@ d3.csv("data/data.csv", function(err, healthData) {
                           xLinearScale, chosenXAxis,
                           yLinearScale, chosenYAxis);
 
-        // updates circles with new x values
+        // updates labels with new x values
         stateTextGroup = renderLabels(stateTextGroup,
                           xLinearScale, chosenXAxis,
                           yLinearScale, chosenYAxis);
 
         // updates tooltips with new info
         stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup);
+
+        // Update the trend line
+        // Doing this inline vs. in a function because having difficulty
+        // with scope of some of the scaling functions
+
+        // Get the coordinates defining the new trend line
+        newtrendCoordArray = getLinearRegr( chosenXAxis, chosenYAxis, healthData );
+        console.log("New Trend Line Coords:", newtrendCoordArray);
+
+        // Create a new line generator function
+        var newcreateLine = d3.line()
+          .x(data => xLinearScale( data.x ) )
+          .y(data => yLinearScale( data.y ) );
+
+        trendLineGroup.transition()
+          .duration(1000)
+          .attr("d", newcreateLine( newtrendCoordArray ) );
 
         // changes classes to change bold text
         if (chosenXAxis === "age") {
@@ -421,6 +463,25 @@ d3.csv("data/data.csv", function(err, healthData) {
 
         // updates tooltips with new info
         stateCirclesGroup = updateToolTip(chosenXAxis, chosenYAxis, stateCirclesGroup);
+
+
+        // Update the trend line
+        // Doing this inline vs. in a function because having difficulty
+        // with scope of some of the scaling functions
+
+        // Get the coordinates defining the new trend line
+        newtrendCoordArray = getLinearRegr( chosenXAxis, chosenYAxis, healthData );
+        console.log("New Trend Line Coords:", newtrendCoordArray);
+
+        // Create a new line generator function
+        var newcreateLine = d3.line()
+          .x(data => xLinearScale( data.x ) )
+          .y(data => yLinearScale( data.y ) );
+
+        trendLineGroup.transition()
+          .duration(1000)
+          .attr("d", newcreateLine( newtrendCoordArray ) );
+
 
         // changes classes to change bold text
         if (chosenYAxis === "poverty") {

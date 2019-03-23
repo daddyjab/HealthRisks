@@ -40,10 +40,10 @@
 }
 
 .trendLine {
-  stroke: blue;
+  stroke: steelblue;
   stroke-opacity: 0.4;
-  stroke-width: 5px;
-  stroke-dasharray: 10,10;
+  stroke-width: 3px;
+  stroke-dasharray: 5,5;
 }
 
 .chart {
