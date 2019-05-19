@@ -15,8 +15,10 @@ This application provides Visualizations of a set health related factors vs. eac
 # Contributions
 
 * Jeffery Brown: Designed and implemented all application-specific code and visualations for this application
+
 * Libraries:
     * Tom Alexander Curve Fitting library (for linear regression): https://github.com/Tom-Alexander/regression-js
+
 * Data:
     * Data on precentage of individuals impacted by various health risks per state was provided as input
 
@@ -29,4 +31,4 @@ This application provides a visualization of different health risk factors and a
 
 | Figure 1: Health Risks - Screenshot of Visualization |
 |----------|
-| ![Health Risks - Screenshot of Visualization](docs/HealthRisks-visualization.gif "Figure 1: Health Risks - Screenshot of Visualization") |
+| ![Health Risks - Screenshot of Visualization is loading...](docs/HealthRisks-visualization.gif "Figure 1: Health Risks - Screenshot of Visualization") |
